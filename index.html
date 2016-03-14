@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Highway.js by DoclerLabs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Highway.js</h1>
+      <h2 class="project-tagline">A flexible pub/sub event emitter for web-worker cross-communication with fallback support.</h2>
+      <a href="https://github.com/DoclerLabs/Highway.js" class="btn">View on GitHub</a>
+      <a href="https://github.com/DoclerLabs/Highway.js/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/DoclerLabs/Highway.js/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="highwayjs" class="anchor" href="#highwayjs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Highway.js</h1>
+
+<p>A flexible pub/sub event emitter for web-worker cross-communication with fallback support.</p>
+
+<p><img src="https://github.com/DoclerLabs/Highway.js/raw/master/www/cross.png" alt='"Highway PubSub Cross-Communication"'></p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Include <strong>Highway.js</strong> on both client side and worker side.</p>
+
+<p>Client:</p>
+
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>Highway.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</pre></div>
+
+<p>Worker:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-en">importScripts</span>(<span class="pl-s"><span class="pl-pds">'</span>Highway.js<span class="pl-pds">'</span></span>)</pre></div>
+
+<p>Initialize:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// Client side</span>
+<span class="pl-k">var</span> Host <span class="pl-k">=</span> <span class="pl-smi">self</span>.<span class="pl-smi">Worker</span> <span class="pl-k">?</span> <span class="pl-k">new</span> <span class="pl-en">self.Worker</span>(<span class="pl-s"><span class="pl-pds">'</span>worker.bundle.js<span class="pl-pds">'</span></span>) <span class="pl-k">:</span> self
+<span class="pl-smi">self</span>.<span class="pl-c1">HW</span> <span class="pl-k">=</span> <span class="pl-smi">self</span>.<span class="pl-c1">HW</span> <span class="pl-k">||</span> <span class="pl-k">new</span> <span class="pl-en">self.Highway</span>(Host)
+<span class="pl-c">// Worker side</span>
+<span class="pl-smi">self</span>.<span class="pl-c1">HW</span> <span class="pl-k">=</span> <span class="pl-smi">self</span>.<span class="pl-c1">HW</span> <span class="pl-k">||</span> <span class="pl-k">new</span> <span class="pl-en">self.Highway</span>()</pre></div>
+
+<p>Note that you cannot use <code>importScripts</code> in case you want proper fallback if there is no web-worker support.
+In that you need to include a bundle in <code>new Worker('worker.bundle.js')</code> and the bundle should also include Highway.
+This way you can include your worker bundle on the client side after no worker support is detected.</p>
+
+<h2>
+<a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h2>
+
+<h3>
+<a id="sub" class="anchor" href="#sub" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>sub</h3>
+
+<p>Subscribe to an event.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-c1">sub</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEvent<span class="pl-pds">'</span></span>, <span class="pl-k">function</span>(){
+    <span class="pl-c">// Do something when event occurs</span>
+    <span class="pl-c">// See pub, this will run 3 times</span>
+})
+<span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-c1">sub</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEvent-&gt;DidSomething<span class="pl-pds">'</span></span>, <span class="pl-k">function</span>(){
+    <span class="pl-c">// Do something when event occurs</span>
+    <span class="pl-c">// See pub, this will run once</span>
+})</pre></div>
+
+<h3>
+<a id="pub" class="anchor" href="#pub" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pub</h3>
+
+<p>Publish an event.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-en">pub</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEvent<span class="pl-pds">'</span></span>, customData)
+<span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-en">pub</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEvent-&gt;DidSomething<span class="pl-pds">'</span></span>, customData)
+<span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-en">pub</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEvent-&gt;IHaveState<span class="pl-pds">'</span></span>, customData, <span class="pl-s"><span class="pl-pds">'</span>passed<span class="pl-pds">'</span></span>)</pre></div>
+
+<h3>
+<a id="one" class="anchor" href="#one" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>one</h3>
+
+<p>Subscribe to an event, unsubscribe once it is called.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-en">one</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEventOnce<span class="pl-pds">'</span></span>, <span class="pl-k">function</span>(){
+    <span class="pl-c">// I'll just run once and automatically unsubscribe then</span>
+})</pre></div>
+
+<h3>
+<a id="off" class="anchor" href="#off" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>off</h3>
+
+<p>Unsubscribe from an event.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// Unsubscribe from ALL events associated with MyOwnEvent</span>
+<span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-en">off</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEvent<span class="pl-pds">'</span></span>)
+<span class="pl-c">// Unsubscribe only a specific function</span>
+<span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-en">off</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEvent<span class="pl-pds">'</span></span>, handlerFunction)
+<span class="pl-c">// Unsubscribe from ALL events associated with MyOwnEvent and event the deep ones. eg: MyOwnEvent-&gt;DeepEvent too</span>
+<span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-en">off</span>(<span class="pl-s"><span class="pl-pds">'</span>MyOwnEvent<span class="pl-pds">'</span></span>, <span class="pl-c1">true</span>)</pre></div>
+
+<h3>
+<a id="destroy" class="anchor" href="#destroy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>destroy</h3>
+
+<p>Destroy the Highway instance.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">self</span>.<span class="pl-c1">HW</span>.<span class="pl-en">destroy</span>()</pre></div>
+
+<h1>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Credits</h1>
+
+<p><a href="http://wintercounter.me">Victor Vincent</a>
+<a href="http://doclerlabs.com">DoclerLabs</a></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/DoclerLabs/Highway.js">Highway.js</a> is maintained by <a href="https://github.com/DoclerLabs">DoclerLabs</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
